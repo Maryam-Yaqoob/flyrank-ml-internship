@@ -3,14 +3,9 @@
 - **Author:** Maryam Yaqoob
 - **Lane:** Freestyle — Growth / Recovery / Momentum Prediction
 - **Repo:** https://github.com/Maryam-Yaqoob/flyrank-ml-internship
-- **Date:** 2026-08-08
+- **Date:** 2026-08-09
 
-> ⚠️ **PENDING:** a few numbers below are marked `[PENDING COLAB RUN]`. They only exist after
-> `work/notebooks/capstone.ipynb` is executed top-to-bottom in Colab with a live `HF_TOKEN`.
-> Replace every `[PENDING COLAB RUN]` with the real printed value before this is the final
-> version deployed to the paper page — do not fill them from memory or estimate them.
-
-## 0. Abstract
+## Abstract
 
 Can a (client, content) page's first-half-of-month search activity flag, before the month ends,
 that it is on track to lose more than 20% of its impressions in the second half? Using
@@ -19,12 +14,12 @@ that it is on track to lose more than 20% of its impressions in the second half?
 base decline rate — this project compares a transparent CTR-vs-position rule (Precision@10 =
 50.0%, not client-held-out) against a Logistic Regression / Random Forest pair trained on five
 first-half-only features and evaluated on clients neither model ever trained on. The
-client-held-out model reaches a measured Precision@10 of **[PENDING COLAB RUN]**, against a 32.7%
-base rate. The output is a ranked, reason-coded review queue — decision support for a
+client-held-out model reaches a measured Precision@10 of **40.0%** (Logistic Regression), against
+a 32.7% base rate. The output is a ranked, reason-coded review queue — decision support for a
 content/SEO team with a fixed review budget, not an automated action or a claim about search
 engine mechanics.
 
-## 1. Problem framing
+## Problem framing
 
 **Decision supported:** given a fixed content-review budget, which (client, content) pages
 should a content/SEO lead check *this sprint*, before a decline is visible in an end-of-month
@@ -46,7 +41,7 @@ position tier, and decline rate did not decrease cleanly by volume tier. A singl
 AND/OR rule isn't cleanly separating the pattern — the concrete evidence for trying a model that
 can combine several weak, non-monotonic signals instead of picking one.
 
-## 2. Data safety
+## Data safety
 
 **Source:** FlyRank ML Internship warehouse (gated, Hugging Face, Parquet), queried directly via
 DuckDB — never downloaded locally. **Table:** `fact_content_daily_performance`, partition
@@ -68,7 +63,7 @@ client-grouped train/test split, never as model inputs.
 **Public-safety confirmation:** no client-identifying details, raw tokens, or private query
 output appear anywhere in `work/`.
 
-## 3. Baseline
+## Baseline
 
 **The rule** (`w04_baseline_score.ipynb`): a page is worth reviewing for CTR if it already has
 real search visibility (`impressions_first_half ≥ 50`) but its click-through rate sits below what
@@ -81,9 +76,9 @@ AND/OR rule, scored on the whole month (not client-held-out).
 | Rule baseline | Whole month, not client-held-out | 50.0% |
 
 The rule clears the base rate, but both signals it depends on tested as **MIXED**
-(Section 1) — real evidence the pattern needs more than one hand-picked feature.
+(Problem framing, above) — real evidence the pattern needs more than one hand-picked feature.
 
-## 4. Model / analysis
+## Model / analysis
 
 **Method:** Logistic Regression first (a coefficient-per-feature model, readable in one sentence
 per feature — the honest floor for "can a straight line through 5 features beat the rule?"),
@@ -93,32 +88,83 @@ then Random Forest (adds non-linear splits and feature interactions the rule can
 than 20% lower than Mar 1–15, else 0 — an observed future-window outcome, never a same-window
 bucket.
 
-**Features:** the same five honest, first-half-only features listed in Section 2.
+**Features:** the same five honest, first-half-only features listed in Data safety, above.
 
-**Which model won on Precision@10 (client-held-out):** `[PENDING COLAB RUN]`
+**Which model won on Precision@10 (client-held-out):** Logistic Regression, at **40.0%** —
+tied with Random Forest on Precision@10, but LR was taken forward for the error-analysis read in
+Evaluation, below (`w05_model.ipynb`). Full comparison from `w05_model.ipynb`:
 
-## 5. Evaluation
+| Method | Precision@10 | Precision@50 | ROC-AUC |
+|---|---|---|---|
+| Base rate (floor) | 31.0% | 31.0% | 0.500 |
+| Week-4 rule baseline (refit train-only, held-out clients) | 10.0% | 8.0% | 0.538 |
+| Logistic Regression | 40.0% | 28.0% | 0.554 |
+| Random Forest | 40.0% | 40.0% | 0.582 |
+
+**Worth naming honestly:** on this held-out comparison, Random Forest actually edges out Logistic
+Regression on Precision@50 and ROC-AUC (it stays useful further down the ranked list, not just at
+the very top). The two tie exactly on the primary metric (Precision@10), which is why Logistic
+Regression — the simpler, fully-readable model — was the one carried into the error analysis
+below. A future iteration with a larger held-out client set could reasonably prefer Random Forest
+instead; the tie itself is a legitimate result, not a resolved one.
+
+## Evaluation
 
 **Split:** grouped by `client_hash_id`, not random rows — 70% of clients → train, 30% → test
 (`test_size=0.3`, `random_state=42`), so no client's pages appear on both sides. This closes the
 leak a random row split would allow (one client's template/strategy quirks bleeding across the
 split). Time is handled by the feature engineering itself — the label window is strictly after
-the feature window for every row, train or test.
+the feature window for every row, train or test. Train: 110,403 rows across 30 clients (base rate
+33.3%). Test: 41,578 rows across 14 held-out clients (base rate 31.0%).
 
 | Method | Evaluated on | Precision@10 |
 |---|---|---|
-| Base rate | Test-set clients | 32.7%\* |
-| Rule baseline (refit train-only, scored on test clients) | Client-held-out | `[PENDING COLAB RUN]` |
-| Model (Logistic Regression vs Random Forest, best of the two) | Client-held-out | `[PENDING COLAB RUN]` |
+| Base rate | Test-set clients | 31.0%\* |
+| Rule baseline (refit train-only, scored on test clients) | Client-held-out | 10.0% |
+| Model (Logistic Regression vs Random Forest, best of the two) | Client-held-out | 40.0% |
 
-\* Whole-population base rate; confirm the test-client-only base rate matches closely in the
-real run — a large gap would itself be worth noting as split imbalance.
+\* Test-client-only base rate (31.0%) sits close to the whole-population figure (32.7%) — no
+meaningful split imbalance.
 
-**Error analysis:** `[PENDING COLAB RUN — w05_model.ipynb Section 4: which rows the winning model
-gets wrong, what it leans on (coefficients / permutation importance), 3 concrete wrong cases and
-why they're hard]`.
+**A validation-design honesty point:** the Week-4 rule's 50.0% Precision@10 (Baseline, above) was
+scored on the whole month, not client-held-out. Refit on train clients only and scored on the
+same held-out test clients as the model, the rule collapses to **10.0%** — well below even the
+base rate. That gap is itself a finding: the rule's original 50.0% number does not generalize to
+unseen clients, and comparing it directly to the model's 40.0% without noting this would overstate
+the rule's real-world performance.
 
-## 6. Interpretation
+**Error analysis** (`w05_model.ipynb`, reading Logistic Regression — the model taken
+forward from Model / analysis, above):
+
+*Coefficients (direction + rough weight):*
+
+| Feature | Coefficient |
+|---|---|
+| `clicks_first_half` | −0.556 |
+| `impressions_first_half` | +0.300 |
+| `active_days_first_half` | −0.270 |
+| `avg_position_first_half` | −0.102 |
+| `ctr_first_half` | +0.019 |
+
+*Random Forest permutation importance (drop in ROC-AUC when a feature is shuffled), for
+comparison:* `ctr_first_half` +0.0455, `avg_position_first_half` +0.0371,
+`impressions_first_half` +0.0349, `active_days_first_half` +0.0232, `clicks_first_half` +0.0114.
+
+*Where the model is most wrong* (top-decile prediction vs actual, by tier, n≥20) — worst cases
+cluster in `low (<10 first-half clicks)` volume tier regardless of position tier, with error
+rates from 39% up to **74.1%** for `no_data`-position / low-volume pairs — the model is least
+reliable exactly where it has the least first-half signal to work with.
+
+*3 concrete wrong cases* (flagged in the predicted top 10, did **not** actually decline):
+- `content_8e1334d6…` — score 0.996, 58,553 first-half impressions, 0.00% CTR, position 4.6, 15
+  active days. Looked at-risk on paper but held steady — likely a case the 5 features genuinely
+  can't see (e.g. a mid-March content refresh not captured here).
+- `content_42571554…` — score 0.857, 24,678 first-half impressions, 0.01% CTR, position 5.4, 15
+  active days. Same pattern.
+- `content_1bb7d17c…` — score 0.856, 27,300 first-half impressions, 0.03% CTR, position 5.1, 15
+  active days. Same pattern.
+
+## Interpretation
 
 **Signal audit** (`w04_signal_audit.ipynb`), tested directly on this slice:
 
@@ -126,17 +172,19 @@ why they're hard]`.
 |---|---|---|
 | 1 — CTR vs position tier | Better (lower) position → higher CTR | MIXED |
 | 2 — Impression volume vs decline rate | More volume → less likely to decline | MIXED |
-| 3 — Active-day coverage vs decline rate | More first-half coverage → different decline rate | `[PENDING COLAB RUN]` |
-| Flag-linked — position vs impressions (local) | Matches paper's portfolio-level health-score-vs-position pattern (r = −0.592)? | `[PENDING COLAB RUN]` |
+| 3 — Active-day coverage vs decline rate | More first-half coverage → different decline rate | MIXED — sparse (1–3d) coverage sits at a 5.9% decline rate, then partial/mostly/full (4–15d) all cluster around ~30%; the relationship is a step, not a clean monotonic trend |
+| Flag-linked — position vs impressions (local) | Matches paper's portfolio-level health-score-vs-position pattern (r = −0.592)? | Directionally consistent but weak — r = −0.059 (n = 150,674) vs the paper's portfolio-level r = −0.592. Same negative direction, on a different value metric and a much narrower slice, but far weaker |
 
 **What this means:** two of three signals a content team might assume hold true — "better
 position always means better CTR," "more volume always means safer from decline" — came back
-MIXED on this slice, not confirmed. That's a real, useful finding on its own: it's evidence
-against trusting any single-signal rule, and the reason a model that weighs several imperfect
-signals together is worth the extra complexity over the hand-written rule — provided Section 5's
-comparison actually shows it earning that complexity.
+MIXED on this slice, not confirmed. Active-day coverage tells a similar story: a real but
+non-monotonic step (sparse coverage clearly worse, but partial/mostly/full are indistinguishable
+from each other), not a clean "more is always better" line. That's a real, useful finding on its
+own: it's evidence against trusting any single-signal rule, and the reason a model that weighs
+several imperfect signals together is worth the extra complexity over the hand-written rule —
+which the Evaluation comparison confirms (40.0% vs the rule's held-out 10.0%).
 
-## 7. Recommendation
+## Recommendation
 
 Ranked output from `w07_action_playbook.ipynb`'s exported queue
 (`work/outputs/action_playbook_queue.csv`):
@@ -153,9 +201,11 @@ Ranked output from `w07_action_playbook.ipynb`'s exported queue
 **Confidence and limits, stated plainly:** this is decision support for March 2026, this
 warehouse slice, and this specific 20%-drop-vs-first-half target — not a general health score,
 not a claim about search-engine mechanics, and not validated yet for other months or clients
-outside this dataset (see Limitations, `capstone.ipynb` Section 5).
+outside this dataset (see Limitations, `capstone.ipynb`). The model is also least
+reliable in exactly the low-first-half-signal cases flagged in the Evaluation error analysis —
+a real, stated limit, not a hidden one.
 
-## 8. Reproducibility
+## Reproducibility
 
 **Re-run from a fresh clone:**
 1. Clone the repo, open `work/notebooks/capstone.ipynb` in Colab (badge link in
@@ -169,9 +219,9 @@ outside this dataset (see Limitations, `capstone.ipynb` Section 5).
 Forest). **Environment:** `%pip -q install duckdb scikit-learn` inside each notebook; see
 `requirements.txt` for the reference pipeline's pinned versions. **Sealed evaluation:** this
 project does not claim a sealed holdout beyond the client-grouped test split described in
-Section 5 — that split's build cell and the metrics it produces are both committed, so "evaluated
+Evaluation, above — that split's build cell and the metrics it produces are both committed, so "evaluated
 once, on held-out clients" is checkable from the repo.
 
-## 9. Acknowledgments & data credit
+## Acknowledgments & data credit
 
 Built on the FlyRank ML Internship dataset — [flyrank.ai](https://flyrank.ai).
