@@ -5,11 +5,7 @@
 - **Repo:** https://github.com/Maryam-Yaqoob/flyrank-ml-internship
 - **Date:** 2026-08-09
 
-<<<<<<< HEAD
 ## Abstract
-=======
-## 0. Abstract
->>>>>>> 60cdd3322f01747a29289b7f1806a27f448714aa
 
 Can a (client, content) page's first-half-of-month search activity flag, before the month ends,
 that it is on track to lose more than 20% of its impressions in the second half? Using
@@ -96,25 +92,7 @@ bucket.
 
 **Which model won on Precision@10 (client-held-out):** Logistic Regression, at **40.0%** —
 tied with Random Forest on Precision@10, but LR was taken forward for the error-analysis read in
-<<<<<<< HEAD
 Evaluation, below (`w05_model.ipynb`). Full comparison from `w05_model.ipynb`:
-=======
-Section 5 (`w05_model.ipynb`). Full comparison from `w05_model.ipynb`:
-
-| Method | Precision@10 | Precision@50 | ROC-AUC |
-|---|---|---|---|
-| Base rate (floor) | 31.0% | 31.0% | 0.500 |
-| Week-4 rule baseline (refit train-only, held-out clients) | 10.0% | 8.0% | 0.538 |
-| Logistic Regression | 40.0% | 28.0% | 0.554 |
-| Random Forest | 40.0% | 40.0% | 0.582 |
-
-**Worth naming honestly:** on this held-out comparison, Random Forest actually edges out Logistic
-Regression on Precision@50 and ROC-AUC (it stays useful further down the ranked list, not just at
-the very top). The two tie exactly on the primary metric (Precision@10), which is why Logistic
-Regression — the simpler, fully-readable model — was the one carried into the error analysis
-below. A future iteration with a larger held-out client set could reasonably prefer Random Forest
-instead; the tie itself is a legitimate result, not a resolved one.
->>>>>>> 60cdd3322f01747a29289b7f1806a27f448714aa
 
 | Method | Precision@10 | Precision@50 | ROC-AUC |
 |---|---|---|---|
@@ -148,50 +126,12 @@ the feature window for every row, train or test. Train: 110,403 rows across 30 c
 \* Test-client-only base rate (31.0%) sits close to the whole-population figure (32.7%) — no
 meaningful split imbalance.
 
-<<<<<<< HEAD
 **A validation-design honesty point:** the Week-4 rule's 50.0% Precision@10 (Baseline, above) was
-=======
-**A validation-design honesty point:** the Week-4 rule's 50.0% Precision@10 (Section 3) was
->>>>>>> 60cdd3322f01747a29289b7f1806a27f448714aa
 scored on the whole month, not client-held-out. Refit on train clients only and scored on the
 same held-out test clients as the model, the rule collapses to **10.0%** — well below even the
 base rate. That gap is itself a finding: the rule's original 50.0% number does not generalize to
 unseen clients, and comparing it directly to the model's 40.0% without noting this would overstate
 the rule's real-world performance.
-<<<<<<< HEAD
-=======
-
-**Error analysis** (`w05_model.ipynb` Section 4, reading Logistic Regression — the model taken
-forward from Section 4):
-
-*Coefficients (direction + rough weight):*
-
-| Feature | Coefficient |
-|---|---|
-| `clicks_first_half` | −0.556 |
-| `impressions_first_half` | +0.300 |
-| `active_days_first_half` | −0.270 |
-| `avg_position_first_half` | −0.102 |
-| `ctr_first_half` | +0.019 |
-
-*Random Forest permutation importance (drop in ROC-AUC when a feature is shuffled), for
-comparison:* `ctr_first_half` +0.0455, `avg_position_first_half` +0.0371,
-`impressions_first_half` +0.0349, `active_days_first_half` +0.0232, `clicks_first_half` +0.0114.
-
-*Where the model is most wrong* (top-decile prediction vs actual, by tier, n≥20) — worst cases
-cluster in `low (<10 first-half clicks)` volume tier regardless of position tier, with error
-rates from 39% up to **74.1%** for `no_data`-position / low-volume pairs — the model is least
-reliable exactly where it has the least first-half signal to work with.
-
-*3 concrete wrong cases* (flagged in the predicted top 10, did **not** actually decline):
-- `content_8e1334d6…` — score 0.996, 58,553 first-half impressions, 0.00% CTR, position 4.6, 15
-  active days. Looked at-risk on paper but held steady — likely a case the 5 features genuinely
-  can't see (e.g. a mid-March content refresh not captured here).
-- `content_42571554…` — score 0.857, 24,678 first-half impressions, 0.01% CTR, position 5.4, 15
-  active days. Same pattern.
-- `content_1bb7d17c…` — score 0.856, 27,300 first-half impressions, 0.03% CTR, position 5.1, 15
-  active days. Same pattern.
->>>>>>> 60cdd3322f01747a29289b7f1806a27f448714aa
 
 **Error analysis** (`w05_model.ipynb`, reading Logistic Regression — the model taken
 forward from Model / analysis, above):
@@ -242,11 +182,7 @@ non-monotonic step (sparse coverage clearly worse, but partial/mostly/full are i
 from each other), not a clean "more is always better" line. That's a real, useful finding on its
 own: it's evidence against trusting any single-signal rule, and the reason a model that weighs
 several imperfect signals together is worth the extra complexity over the hand-written rule —
-<<<<<<< HEAD
 which the Evaluation comparison confirms (40.0% vs the rule's held-out 10.0%).
-=======
-which Section 5's comparison confirms (40.0% vs the rule's held-out 10.0%).
->>>>>>> 60cdd3322f01747a29289b7f1806a27f448714aa
 
 ## Recommendation
 
@@ -265,13 +201,8 @@ Ranked output from `w07_action_playbook.ipynb`'s exported queue
 **Confidence and limits, stated plainly:** this is decision support for March 2026, this
 warehouse slice, and this specific 20%-drop-vs-first-half target — not a general health score,
 not a claim about search-engine mechanics, and not validated yet for other months or clients
-<<<<<<< HEAD
 outside this dataset (see Limitations, `capstone.ipynb`). The model is also least
 reliable in exactly the low-first-half-signal cases flagged in the Evaluation error analysis —
-=======
-outside this dataset (see Limitations, `capstone.ipynb` Section 5). The model is also least
-reliable in exactly the low-first-half-signal cases flagged in Section 5's error analysis —
->>>>>>> 60cdd3322f01747a29289b7f1806a27f448714aa
 a real, stated limit, not a hidden one.
 
 ## Reproducibility
