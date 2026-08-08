@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Early-Warning Decline Detection ÔÇö FlyRank ML Internship Capstone</title>
+<title>Early-Warning Decline Detection — FlyRank ML Internship Capstone</title>
 <meta name="description" content="Can first-half-of-month search activity flag a page on track to lose 20%+ of its impressions? A FlyRank ML Internship capstone, Growth/Recovery/Momentum lane.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -175,12 +175,12 @@
 
 <header class="hero">
   <div class="hero-inner">
-    <p class="eyebrow">FlyRank ML Internship ┬À Capstone Paper</p>
+    <p class="eyebrow">FlyRank ML Internship · Capstone Paper</p>
     <h1 class="title">Can the first half of a month warn you about the second?</h1>
-    <p class="dek">Early-warning decline detection for search content ÔÇö Growth / Recovery / Momentum Prediction, freestyle lane.</p>
+    <p class="dek">Early-warning decline detection for search content — Growth / Recovery / Momentum Prediction, freestyle lane.</p>
     <div class="metabar">
       <span><b>Author</b> Maryam Yaqoob</span>
-      <span><b>Data</b> fact_content_daily_performance ┬À month=2026-03</span>
+      <span><b>Data</b> fact_content_daily_performance · month=2026-03</span>
       <span><b>Repo</b> <a href="https://github.com/Maryam-Yaqoob/flyrank-ml-internship" style="color:#C9E8DF;">github.com/Maryam-Yaqoob/flyrank-ml-internship</a></span>
     </div>
   </div>
@@ -196,14 +196,14 @@
       <p>Can a (client, content) page's first-half-of-month search activity flag, before the month
       ends, that it is on track to lose more than 20% of its impressions in the second half?
       Using <code>fact_content_daily_performance</code> (month=2026-03) from the FlyRank ML
-      Internship warehouse ÔÇö 9,841,378 rows across 55 clients, aggregated into 151,981
-      (client, content) pairs with a 32.7% base decline rate ÔÇö this project compares a
+      Internship warehouse — 9,841,378 rows across 55 clients, aggregated into 151,981
+      (client, content) pairs with a 32.7% base decline rate — this project compares a
       transparent CTR-vs-position rule (Precision@10&nbsp;=&nbsp;50.0%, not client-held-out)
       against a Logistic Regression / Random Forest pair trained on five first-half-only
       features and evaluated on clients neither model ever trained on. The client-held-out
       model reaches a measured Precision@10 of
       <span class="tag tag-pending">pending Colab run</span> against a 32.7% base rate. The
-      output is a ranked, reason-coded review queue ÔÇö decision support for a content/SEO team
+      output is a ranked, reason-coded review queue — decision support for a content/SEO team
       with a fixed review budget, not an automated action or a claim about search-engine
       mechanics.</p>
     </div>
@@ -212,7 +212,7 @@
   <div class="callout">
     <span class="tag tag-pending">pending</span> This page is a deploy-ready draft. Cells marked
     <strong>pending Colab run</strong> only exist after <code>work/notebooks/capstone.ipynb</code>
-    is executed top-to-bottom with a live <code>HF_TOKEN</code> ÔÇö replace them with the real
+    is executed top-to-bottom with a live <code>HF_TOKEN</code> — replace them with the real
     printed values before treating this as final.
   </div>
 
@@ -224,20 +224,20 @@
     <p><strong>Decision supported:</strong> given a fixed content-review budget, which
       (client, content) pages should a content/SEO lead check this sprint? <strong>Unit of
       analysis:</strong> one (client, content) pair's activity within March 2026, split into a
-      first-half feature window (Mar 1ÔÇô15) and a second-half label window (Mar 16ÔÇô31).
+      first-half feature window (Mar 1–15) and a second-half label window (Mar 16–31).
       <strong>Output:</strong> a ranked queue, sorted by predicted probability of
       <code>is_declining_next_half</code>, each row carrying a plain-language reason code and a
-      suggested action. <strong>The human action:</strong> a person reviews the page ÔÇö nothing here
+      suggested action. <strong>The human action:</strong> a person reviews the page — nothing here
       is automated. <strong>Cost of a wrong call:</strong> a false positive is a wasted review,
       cheap and recoverable; a false negative is a real decline that goes unreviewed until it
-      already shows up in a monthly report ÔÇö the more expensive direction, which is why the
+      already shows up in a monthly report — the more expensive direction, which is why the
       primary metric is Precision@10 rather than raw accuracy.</p>
-    <p><strong>Why ML over a fixed rule:</strong> a hand-written rule was tried first ÔÇö "flag
+    <p><strong>Why ML over a fixed rule:</strong> a hand-written rule was tried first — "flag
       pages with real volume whose CTR is below what their position tier typically gets." It beats
       the base rate (50.0% vs 32.7% Precision@10), but both signals it leans on came back
       <strong>MIXED</strong> when tested directly: CTR did not decrease cleanly by position tier,
       and decline rate did not decrease cleanly by volume tier. A single hand-written AND/OR rule
-      isn't cleanly separating the pattern ÔÇö the concrete case for a model that can combine
+      isn't cleanly separating the pattern — the concrete case for a model that can combine
       several weak, non-monotonic signals.</p>
   </section>
 
@@ -245,19 +245,19 @@
     <div class="sec-eyebrow"><span class="tag tag-section">Section 02</span></div>
     <h2>Data safety</h2>
     <p><strong>Source:</strong> FlyRank ML Internship warehouse (gated, Hugging Face, Parquet),
-      queried directly via DuckDB ÔÇö never downloaded locally. <strong>Table:</strong>
+      queried directly via DuckDB — never downloaded locally. <strong>Table:</strong>
       <code>fact_content_daily_performance</code>, partition <code>month=2026-03</code> (a
       mid-panel month; the sealed final-month <code>_sample</code> table was never touched).
-      Grain confirmed unique (<code>report_date ├ù client_hash_id ├ù content_hash_id</code>, 0
+      Grain confirmed unique (<code>report_date × client_hash_id × content_hash_id</code>, 0
       duplicates).</p>
-    <p><strong>Features used</strong> ÔÇö five, all Mar 1ÔÇô15 only: <code>impressions_first_half</code>,
+    <p><strong>Features used</strong> — five, all Mar 1–15 only: <code>impressions_first_half</code>,
       <code>clicks_first_half</code>, <code>ctr_first_half</code>,
       <code>avg_position_first_half</code>, <code>active_days_first_half</code>.</p>
-    <p><strong>Excluded on purpose:</strong> <code>impressions_second_half</code> ÔÇö the exact raw
+    <p><strong>Excluded on purpose:</strong> <code>impressions_second_half</code> — the exact raw
       material the label is built from (a leakage trap confirmed this: training with it included
       made the score jump unrealistically). Any pre-computed FlyRank scoring column, so the model
       learns a pattern rather than reproducing FlyRank's own prior judgment.
-      <code>client_hash_id</code> / <code>content_hash_id</code> ÔÇö used only to build the
+      <code>client_hash_id</code> / <code>content_hash_id</code> — used only to build the
       client-grouped train/test split, never as model inputs.</p>
     <p>No client-identifying details, raw tokens, or private query output appear anywhere in this
       repo's <code>work/</code> folder.</p>
@@ -267,8 +267,8 @@
     <div class="sec-eyebrow"><span class="tag tag-section">Section 03</span></div>
     <h2>Baseline</h2>
     <p>A page is worth reviewing for CTR if it already has real search visibility
-      (<code>impressions_first_half ÔëÑ 50</code>) but its click-through rate sits below what pages
-      at its own position tier typically get. No fitted weights ÔÇö a transparent, hand-coded rule,
+      (<code>impressions_first_half ≥ 50</code>) but its click-through rate sits below what pages
+      at its own position tier typically get. No fitted weights — a transparent, hand-coded rule,
       scored on the whole month (not client-held-out).</p>
     <table>
       <thead><tr><th>Method</th><th>Evaluated on</th><th>Precision@10</th></tr></thead>
@@ -278,18 +278,18 @@
       </tbody>
     </table>
     <p>The rule clears the base rate, but both signals it depends on tested as
-      <strong>MIXED</strong> ÔÇö real evidence the pattern needs more than one hand-picked feature.</p>
+      <strong>MIXED</strong> — real evidence the pattern needs more than one hand-picked feature.</p>
   </section>
 
   <section id="model">
     <div class="sec-eyebrow"><span class="tag tag-section">Section 04</span></div>
     <h2>Model &amp; analysis</h2>
-    <p><strong>Method:</strong> Logistic Regression first ÔÇö a coefficient-per-feature model,
+    <p><strong>Method:</strong> Logistic Regression first — a coefficient-per-feature model,
       readable in one sentence per feature, the honest floor for "can a straight line through 5
-      features beat the rule?" ÔÇö then Random Forest, which adds non-linear splits and feature
+      features beat the rule?" — then Random Forest, which adds non-linear splits and feature
       interactions the rule can't express.</p>
     <p><strong>Target:</strong> <code>is_declining_next_half</code> = 1 if a pair's summed
-      impressions in Mar 16ÔÇô31 are more than 20% lower than Mar 1ÔÇô15, else 0 ÔÇö an observed
+      impressions in Mar 16–31 are more than 20% lower than Mar 1–15, else 0 — an observed
       future-window outcome, never a same-window bucket.</p>
     <p><strong>Which model wins on client-held-out Precision@10:</strong>
       <span class="tag tag-pending">pending Colab run</span></p>
@@ -298,10 +298,10 @@
   <section id="evaluation">
     <div class="sec-eyebrow"><span class="tag tag-section">Section 05</span></div>
     <h2>Evaluation</h2>
-    <p><strong>Split:</strong> grouped by <code>client_hash_id</code>, not random rows ÔÇö 70% of
-      clients ÔåÆ train, 30% ÔåÆ test (<code>random_state=42</code>), so no client's pages appear on
+    <p><strong>Split:</strong> grouped by <code>client_hash_id</code>, not random rows — 70% of
+      clients → train, 30% → test (<code>random_state=42</code>), so no client's pages appear on
       both sides. This closes the leak a random row split would allow. Time is handled by the
-      feature engineering itself ÔÇö the label window is strictly after the feature window for
+      feature engineering itself — the label window is strictly after the feature window for
       every row.</p>
     <table>
       <thead><tr><th>Method</th><th>Evaluated on</th><th>Precision@10</th></tr></thead>
@@ -311,10 +311,10 @@
         <tr><td>Model (best of LR / RF)</td><td>Client-held-out</td><td class="pending-cell">pending</td></tr>
       </tbody>
     </table>
-    <p style="font-size:14px;color:var(--ink-soft);">*Whole-population base rate ÔÇö confirm the
+    <p style="font-size:14px;color:var(--ink-soft);">*Whole-population base rate — confirm the
       test-client-only base rate matches closely; a large gap is itself worth noting as split
       imbalance.</p>
-    <p><strong>Error analysis:</strong> <span class="tag tag-pending">pending Colab run</span> ÔÇö
+    <p><strong>Error analysis:</strong> <span class="tag tag-pending">pending Colab run</span> —
       which rows the winning model gets wrong, what it leans on (coefficients / permutation
       importance), and a few concrete wrong cases with the reason they're hard.</p>
   </section>
@@ -323,17 +323,17 @@
     <div class="sec-eyebrow"><span class="tag tag-section">Section 06</span></div>
     <h2>Interpretation</h2>
     <table>
-      <caption>Signal audit ÔÇö tested directly on this slice</caption>
+      <caption>Signal audit — tested directly on this slice</caption>
       <thead><tr><th>Test</th><th>Hypothesis</th><th>Verdict</th></tr></thead>
       <tbody>
-        <tr><td>CTR vs position tier</td><td>Better position ÔåÆ higher CTR</td><td><span class="tag" style="background:var(--amber-bg);color:#8A5417;">MIXED</span></td></tr>
-        <tr><td>Volume vs decline rate</td><td>More volume ÔåÆ less likely to decline</td><td><span class="tag" style="background:var(--amber-bg);color:#8A5417;">MIXED</span></td></tr>
-        <tr><td>Active-day coverage vs decline</td><td>More coverage ÔåÆ different decline rate</td><td class="pending-cell">pending</td></tr>
-        <tr><td>Flag-linked: position vs impressions</td><td>Matches paper's portfolio r&nbsp;=&nbsp;ÔêÆ0.592</td><td class="pending-cell">pending</td></tr>
+        <tr><td>CTR vs position tier</td><td>Better position → higher CTR</td><td><span class="tag" style="background:var(--amber-bg);color:#8A5417;">MIXED</span></td></tr>
+        <tr><td>Volume vs decline rate</td><td>More volume → less likely to decline</td><td><span class="tag" style="background:var(--amber-bg);color:#8A5417;">MIXED</span></td></tr>
+        <tr><td>Active-day coverage vs decline</td><td>More coverage → different decline rate</td><td class="pending-cell">pending</td></tr>
+        <tr><td>Flag-linked: position vs impressions</td><td>Matches paper's portfolio r&nbsp;=&nbsp;−0.592</td><td class="pending-cell">pending</td></tr>
       </tbody>
     </table>
-    <p>Two of three signals a content team might assume hold true ÔÇö "better position always means
-      better CTR," "more volume always means safer from decline" ÔÇö came back MIXED on this slice,
+    <p>Two of three signals a content team might assume hold true — "better position always means
+      better CTR," "more volume always means safer from decline" — came back MIXED on this slice,
       not confirmed. That's a useful finding on its own: evidence against trusting any
       single-signal rule, and the reason a model weighing several imperfect signals together is
       worth the added complexity, provided the evaluation above shows it actually earning that.</p>
@@ -343,18 +343,18 @@
     <div class="sec-eyebrow"><span class="tag tag-section">Section 07</span></div>
     <h2>Recommendation</h2>
     <ol class="reco">
-      <li><strong>Review <code>high_volume_at_risk</code>-flagged pages first</strong> ÔÇö most
+      <li><strong>Review <code>high_volume_at_risk</code>-flagged pages first</strong> — most
         impressions at stake if the flag is right, so the highest expected-value use of limited
         review time.</li>
-      <li><strong>Treat <code>thin_coverage</code>-flagged pages as lower-confidence</strong> ÔÇö
+      <li><strong>Treat <code>thin_coverage</code>-flagged pages as lower-confidence</strong> —
         fewer than 5 active days in the feature window means a noisier estimate; verify against
         daily-level data before acting.</li>
-      <li><strong>Never automate directly from this queue</strong> ÔÇö no auto-delete, de-index, or
+      <li><strong>Never automate directly from this queue</strong> — no auto-delete, de-index, or
         redirect. A human checks the live page, rules out a site-wide cause, and checks for a
         known seasonal dip before treating a flag as content-specific.</li>
     </ol>
     <p style="margin-top:14px;">This is decision support for March 2026, this warehouse slice, and
-      this specific 20%-drop-vs-first-half target ÔÇö not a general health score, not a claim about
+      this specific 20%-drop-vs-first-half target — not a general health score, not a claim about
       search-engine mechanics, and not yet validated for other months or clients.</p>
   </section>
 
@@ -363,10 +363,10 @@
     <h2>Reproducibility</h2>
     <p>Clone the repo, open <code>work/notebooks/capstone.ipynb</code> in Colab, add your own
       <code>HF_TOKEN</code> (Read token, gated-repositories permission) to Colab's Secrets panel,
-      and Runtime ÔåÆ Run all. The notebook is self-contained ÔÇö it rebuilds
+      and Runtime → Run all. The notebook is self-contained — it rebuilds
       <code>feature_frame</code>, trains the model, and rebuilds the ranked queue inline.
       <code>random_state=42</code> throughout. This project claims a client-grouped held-out
-      evaluation, not a separately sealed month ÔÇö the split's build cell and the metrics it
+      evaluation, not a separately sealed month — the split's build cell and the metrics it
       produces are both committed, so the evaluation is checkable from the repo, not taken on
       faith.</p>
   </section>
@@ -374,13 +374,13 @@
   <section id="ack">
     <div class="sec-eyebrow"><span class="tag tag-section">Section 09</span></div>
     <h2>Acknowledgments &amp; data credit</h2>
-    <p>Built on the FlyRank ML Internship dataset ÔÇö <a href="https://flyrank.ai">flyrank.ai</a>.</p>
+    <p>Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai">flyrank.ai</a>.</p>
   </section>
 
 </main>
 
 <footer>
-  <p class="credit">FlyRank ML Internship Capstone ┬À Growth / Recovery / Momentum Prediction ┬À
+  <p class="credit">FlyRank ML Internship Capstone · Growth / Recovery / Momentum Prediction ·
     <a href="https://github.com/Maryam-Yaqoob/flyrank-ml-internship">source repo</a></p>
 </footer>
 </div>
